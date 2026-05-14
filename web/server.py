@@ -148,7 +148,7 @@ async def stream_llm(system_prompt: str, messages: list[dict]):
                     json={
                         "model": MODEL,
                         "messages": api_messages,
-                        "max_tokens": 4096,
+                        "max_tokens": 8192,
                         "stream": True,
                     },
                 ) as response:
@@ -181,6 +181,14 @@ def parse_confirm(text: str) -> bool:
     return "[READY_FOR_CONFIRM]" in text
 
 
+def safe_slug(text: str) -> str:
+    """Generate ASCII-only slug from text, stripping non-ASCII chars"""
+    import re
+    ascii_text = re.sub(r'[^\x00-\x7F]', '', text)  # remove non-ASCII
+    slug = re.sub(r'[^a-zA-Z0-9]+', '-', ascii_text).strip('-').lower()
+    return slug or "project"
+
+
 # ── Routes ──────────────────────────────────────────────
 
 @app.get("/")
@@ -200,7 +208,7 @@ async def start_session(request: Request):
         )
 
     session_id = str(uuid.uuid4())[:8]
-    slug = project_name[:30].replace(" ", "-").lower()
+    slug = safe_slug(project_name)
 
     sessions[session_id] = {
         "project_name": project_name,
@@ -332,17 +340,33 @@ async def advance_phase(session_id: str):
         session["messages"] = [{"role": "user", "content": msg}]
 
         full_response = ""
-        async for chunk in stream_llm(system_prompt, session["messages"]):
-            chunk_data = chunk.replace("data: ", "").strip()
-            if chunk_data:
-                try:
-                    data = json.loads(chunk_data)
-                    if data.get("type") == "token":
-                        full_response += data.get("text", "")
-                except json.JSONDecodeError:
-                    pass
-            yield chunk
+        # Phase 3/4 may need auto-continue due to output length
+        max_continues = 3 if next_phase in (3, 4) else 0
+        for cont_attempt in range(max_continues + 1):
+            chunk_count = 0
+            async for chunk in stream_llm(system_prompt, session["messages"]):
+                chunk_data = chunk.replace("data: ", "").strip()
+                if chunk_data:
+                    try:
+                        data = json.loads(chunk_data)
+                        if data.get("type") == "token":
+                            full_response += data.get("text", "")
+                            chunk_count += 1
+                    except json.JSONDecodeError:
+                        pass
+                yield chunk
 
+            session["messages"].append({"role": "assistant", "content": full_response[-5000:]})
+
+            # Check if we should auto-continue
+            if parse_confirm(full_response):
+                break
+            if cont_attempt < max_continues and chunk_count > 0:
+                session["messages"].append({"role": "user", "content": "请继续生成未完成的内容"})
+                full_response += "\n\n"
+                yield f"data: {json.dumps({'type': 'token', 'text': '\n\n[继续生成...]\n\n'})}\n\n"
+
+        session["messages"] = session["messages"][:1]  # Keep only original user msg + final response
         session["messages"].append({"role": "assistant", "content": full_response})
 
         phase_keys = {2: "analyze", 3: "generate", 4: "review", 5: "refine"}
@@ -393,7 +417,7 @@ async def export_artifact(session_id: str, artifact: str):
         return StreamingResponse(
             iter([content]),
             media_type="text/markdown",
-            headers={"Content-Disposition": f"attachment; filename=prd-{slug}.md"}
+            headers={"Content-Disposition": f"attachment; filename=prd-{slug}.md".encode('ascii', 'ignore').decode()}
         )
 
     elif artifact == "trace":
@@ -403,7 +427,7 @@ async def export_artifact(session_id: str, artifact: str):
         return StreamingResponse(
             iter([content]),
             media_type="application/json",
-            headers={"Content-Disposition": f"attachment; filename=traceability-{slug}.json"}
+            headers={"Content-Disposition": f"attachment; filename=traceability-{slug}.json".encode('ascii', 'ignore').decode()}
         )
 
     return {"error": f"未知制品类型: {artifact}"}

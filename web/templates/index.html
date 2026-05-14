@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ReqBot — AI 需求分析 Agent</title>
 <link rel="stylesheet" href="/static/style.css">
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- 零外部依赖，无 CDN 阻塞 -->
 </head>
 <body>
 
@@ -63,7 +63,8 @@
 
   <!-- Artifact Panel (Right) -->
   <aside class="panel artifact-panel">
-    <h3>Artifacts</h3>
+    <h3>产物预览</h3>
+    <div id="download-links" class="download-links"></div>
     <div class="artifact-tabs">
       <button class="artifact-tab active" data-tab="prd">PRD</button>
       <button class="artifact-tab" data-tab="trace">Traceability</button>
@@ -71,7 +72,6 @@
     <div id="artifact-content" class="artifact-content">
       <div class="empty-state">完成对应阶段后自动展示</div>
     </div>
-    <div id="download-links" class="download-links"></div>
   </aside>
 </div>
 

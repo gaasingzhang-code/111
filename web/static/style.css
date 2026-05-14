@@ -381,25 +381,52 @@ body {
   color: var(--accent);
 }
 
+.guide-status {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+.guide-hint {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
 .download-links {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.download-links:empty {
+  display: none;
 }
 
 .download-btn {
-  padding: 6px 14px;
-  background: var(--accent-light);
-  color: var(--accent);
+  padding: 8px 16px;
+  background: var(--success);
+  color: #fff;
   border: none;
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
+  text-align: center;
 }
 
-.download-btn:hover { background: #ddd6fe; }
+.download-btn:hover {
+  background: #059669;
+  color: #fff;
+  text-decoration: none;
+}
 
 /* ── Loading ───────────────────────────── */
 .typing-indicator {
