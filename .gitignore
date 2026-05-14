@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.pyc
+web/server.log
+output/*web*

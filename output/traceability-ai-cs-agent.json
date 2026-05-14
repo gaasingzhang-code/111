@@ -1,0 +1,103 @@
+{
+  "project": "AI智能客服Agent平台",
+  "generated": "2026-05-12",
+  "trace_type": "4-way: Source → Need → Requirement → PRD Section",
+  "chains": [
+    {
+      "source": "访谈-产品经理-Round1 — '不能使用公共模型训练数据，要能接入企业自己的知识库'",
+      "need": "N-001: 支持导入私有知识库",
+      "requirement": "FR-001: 私有知识库接入",
+      "prd_section": "四.4.2 功能详解",
+      "acceptance_criteria": "支持3种格式；5分钟内可检索；关联度≥95%"
+    },
+    {
+      "source": "访谈-产品经理-Round1 — '每条回答要能追溯到知识库里的原文'",
+      "need": "N-004: Agent 回答需可溯源",
+      "requirement": "FR-002: 回答溯源展示",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "每条回答≥1条引用；无相关内容时说'不知道'"
+    },
+    {
+      "source": "访谈-产品经理-Round1 — 'AI处理80%的常见问题，剩下20%复杂问题转人工'",
+      "need": "N-002: Agent自动处理+转人工",
+      "requirement": "FR-003: 智能转人工",
+      "prd_section": "四.4.1 + 六 用户流程",
+      "acceptance_criteria": "三类场景覆盖；携带≤300字摘要"
+    },
+    {
+      "source": "访谈-产品经理-Round1 — '需要有管理后台，能看得到数据'",
+      "need": "N-003: Web管理后台",
+      "requirement": "FR-004: Web管理后台",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "知识库CRUD；对话筛选；仪表盘指标"
+    },
+    {
+      "source": "访谈-产品经理-Round3 — '多租户必须隔离'",
+      "need": "N-009: 多租户数据隔离",
+      "requirement": "FR-005: 多租户数据隔离",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "跨租户不可访问；新增租户无需改代码"
+    },
+    {
+      "source": "访谈-产品经理-Round1 — 'Web端嵌个聊天组件'",
+      "need": "N-005: 多渠道接入",
+      "requirement": "FR-006: Web聊天组件",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "≤50KB；一行代码；响应式"
+    },
+    {
+      "source": "访谈-产品经理-Round1 — '也要有API'",
+      "need": "N-005: 多渠道接入",
+      "requirement": "FR-007: REST API",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "CRUD接口；API Key认证；P99<5s"
+    },
+    {
+      "source": "访谈-产品经理-Round2 — '运营/客服主管维护知识库，每周更新2-3次'",
+      "need": "N-008: 知识库管理后台",
+      "requirement": "FR-008: 知识库内容管理",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "单条CRUD；批量导入≤5000条；5分钟生效"
+    },
+    {
+      "source": "访谈-产品经理-Round2 — '3秒内开始回复，流式输出，感知延迟不超过1秒'",
+      "need": "N-007: 回复延迟要求",
+      "requirement": "FR-009: 流式低延迟回复",
+      "prd_section": "四.4.1 + 七 非功能需求",
+      "acceptance_criteria": "P95<3s；P99<5s；≥30 tokens/s"
+    },
+    {
+      "source": "访谈-产品经理-Round2 — '敏感词检测（投诉/法律威胁）'",
+      "need": "N-006: 转人工触发规则",
+      "requirement": "FR-010: 敏感词检测",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "自定义词库；实时告警；检测<200ms"
+    },
+    {
+      "source": "访谈-产品经理-Round3 — 'V1不做CRM集成，但预留工单导出接口'",
+      "need": "N-010: V1范围限制",
+      "requirement": "FR-011: 工单导出",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "CSV/JSON导出；含会话信息和转人工原因"
+    },
+    {
+      "source": "分析推断 — Gap Detection: '如何评估Agent回答质量？'",
+      "need": "N-003: Web管理后台（延伸）",
+      "requirement": "FR-012: 回答质量评估",
+      "prd_section": "四.4.1",
+      "acceptance_criteria": "满意/不满意/需改进标注；仪表盘汇总"
+    }
+  ],
+  "coverage_summary": {
+    "total_needs": 10,
+    "total_requirements": 12,
+    "full_trace_count": 12,
+    "partial_trace_count": 0,
+    "untraced_count": 0,
+    "coverage_rate": "100%"
+  },
+  "unverified_claims": [
+    "FR-012 的用户需求来自于分析推断而非访谈确认，建议在后续用户验证中确认客服主管确实需要质量评估功能",
+    "三.2 中的企业管理员画像基于分析推断，建议在 M0 用户验证中确认"
+  ]
+}

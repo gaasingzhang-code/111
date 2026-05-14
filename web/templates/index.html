@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReqBot — AI 需求分析 Agent</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <!-- Phase Panel (Left) -->
+  <aside class="panel phase-panel">
+    <h3>Workflow</h3>
+    <div class="phase-item active">
+      <span class="dot"></span>
+      <div>
+        <div>Phase 1 — Discover</div>
+        <div class="round-dots" id="round-dots">
+          <span class="rd rd-1 active">●</span>
+          <span class="rd rd-2">○</span>
+          <span class="rd rd-3">○</span>
+          <span class="rd rd-4">○</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase-item">
+      <span class="dot"></span> Phase 2 — Analyze
+    </div>
+    <div class="phase-item">
+      <span class="dot"></span> Phase 3 — Generate
+    </div>
+    <div class="phase-item">
+      <span class="dot"></span> Phase 4 — Review
+    </div>
+    <div class="phase-item">
+      <span class="dot"></span> Phase 5 — Refine
+    </div>
+  </aside>
+
+  <!-- Chat Area (Center) -->
+  <main class="chat-area">
+    <div class="chat-header">
+      <h2>
+        ReqBot
+        <span id="phase-badge" class="phase-badge">启动中...</span>
+      </h2>
+      <span id="chat-header-title" style="font-size:13px;color:var(--text-secondary)"></span>
+    </div>
+
+    <div id="messages" class="messages"></div>
+
+    <div class="chat-input-area">
+      <input type="text" id="msg-input" placeholder="描述你想做的产品，例如：做一个跨境电商库存管理后台..." autofocus>
+      <button id="send-btn">发送</button>
+      <button id="confirm-btn" class="confirm-btn" style="display:none">确认并继续</button>
+    </div>
+  </main>
+
+  <!-- Artifact Panel (Right) -->
+  <aside class="panel artifact-panel">
+    <h3>Artifacts</h3>
+    <div class="artifact-tabs">
+      <button class="artifact-tab active" data-tab="prd">PRD</button>
+      <button class="artifact-tab" data-tab="trace">Traceability</button>
+    </div>
+    <div id="artifact-content" class="artifact-content">
+      <div class="empty-state">完成对应阶段后自动展示</div>
+    </div>
+    <div id="download-links" class="download-links"></div>
+  </aside>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

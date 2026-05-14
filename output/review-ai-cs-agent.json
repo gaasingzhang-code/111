@@ -1,0 +1,153 @@
+{
+  "phase": "review",
+  "project_name": "AI智能客服Agent平台",
+  "project_slug": "ai-cs-agent",
+  "audit_summary": {
+    "overall_rating": "ready_with_minor_issues",
+    "total_issues": 8,
+    "blockers": 0,
+    "warnings": 4,
+    "suggestions": 4
+  },
+  "issues": [
+    {
+      "id": "ISSUE-001",
+      "severity": "warning",
+      "category": "completeness",
+      "location": "八、数据需求 — PII 脱敏规则",
+      "description": "PII 脱敏策略标记为「待法务确认」，但这是多租户产品上线前的合规前置项",
+      "suggestion": "建议在正式上线前取得法务书面确认。V1 内测期间可在服务条款中声明'请勿在聊天中分享个人敏感信息'作为临时缓解",
+      "impact": "如未解决，可能影响正式商用合规性"
+    },
+    {
+      "id": "ISSUE-002",
+      "severity": "warning",
+      "category": "measurability",
+      "location": "FR-001 验收标准 — '回答-原文追溯关联度 ≥95%'",
+      "description": "95% 的度量方式不明确——'人工抽检 100 条中 ≥95 条可找到对应原文'定义了方法但未定义'可找到'的判据（完全匹配？语义匹配？关键词重叠？）",
+      "suggestion": "建议明确判据：人工抽检100条，标注员判断'回答中的关键事实是否可在引用原文中找到'，是/否二分。≥95条为'是'即达标",
+      "impact": "验收标准模糊可能导致测试时争议"
+    },
+    {
+      "id": "ISSUE-003",
+      "severity": "warning",
+      "category": "ambiguity",
+      "location": "七、非功能需求 NFR-005 — '可用性 ≥99.5%'",
+      "description": "99.5% 是月度还是年度口径？计划维护时间是否计入？定义不清",
+      "suggestion": "建议明确为：'月度系统可用性 ≥99.5%（不含预先公告的计划维护窗口，每月 ≤4 小时）'",
+      "impact": "SLA 条款模糊可能导致客户争议"
+    },
+    {
+      "id": "ISSUE-004",
+      "severity": "warning",
+      "category": "consistency",
+      "location": "FR-009 vs EC-009",
+      "description": "FR-009 定义 P95 首 token <3s，但 EC-009 中 LLM 超时后重试一次可能使实际延迟翻倍（重试导致 >6s），部分场景下 P95 可能超标",
+      "suggestion": "建议在 EC-009 中补充：重试仅在前次调用 3s 内超时时执行，且总超时预算 6s；超过则直接触发转人工",
+      "impact": "极端情况下 P95 延迟指标可能被拉高"
+    },
+    {
+      "id": "ISSUE-005",
+      "severity": "suggestion",
+      "category": "completeness",
+      "location": "三、目标用户 — 企业管理员画像",
+      "description": "企业管理员画像标注'基于分析推断而非真实用户访谈'，V1 前的用户验证计划未提及",
+      "suggestion": "建议在里程碑中增加 M0: 访谈 3-5 名目标企业的管理员/客服主管，验证画像和需求假设",
+      "impact": "未验证的画像可能导致后台设计偏离实际"
+    },
+    {
+      "id": "ISSUE-006",
+      "severity": "suggestion",
+      "category": "measurability",
+      "location": "FR-004 — 数据仪表盘",
+      "description": "仪表盘的具体指标列表未定义（仅提到 AI处理率、高频问题 TOP10），缺少对话量趋势、响应时间分布、转人工原因分布等运营常用指标",
+      "suggestion": "建议补充 V1 仪表盘完整指标清单，至少包含：会话量趋势、AI处理率、平均响应时间、转人工率及原因分布、用户满意度趋势、知识库覆盖率",
+      "impact": "客服主管的核心监控需求可能未被满足"
+    },
+    {
+      "id": "ISSUE-007",
+      "severity": "suggestion",
+      "category": "edge_case",
+      "location": "九、业务规则与边界用例",
+      "description": "缺少知识库内容版权/授权的边界用例——如果企业上传了未获授权的第三方文档，平台的责任边界？",
+      "suggestion": "建议在服务条款中增加版权声明条款，并在 BR 中增加：企业保证上传内容拥有合法授权",
+      "impact": "低概率但法律风险高"
+    },
+    {
+      "id": "ISSUE-008",
+      "severity": "suggestion",
+      "category": "ambiguity",
+      "location": "十一、成功指标 — '租户接入时间 <30 分钟'",
+      "description": "'接入时间'未明确起点和终点——从注册开始算？还是从上传知识库开始算？终点是 Agent 可回答任意问题还是第一个测试问题？",
+      "suggestion": "建议明确定义：'从租户注册完成到成功上传知识库并获得第一条 Agent 正确回答的时间'",
+      "impact": "指标不可衡量"
+    }
+  ],
+  "traceability_matrix": {
+    "source_count": 10,
+    "need_count": 10,
+    "requirement_count": 12,
+    "prd_sections_linked": 12,
+    "source_need_mapping": {
+      "N-001": "FR-001 知识库接入",
+      "N-002": "FR-003 智能转人工",
+      "N-003": "FR-004 管理后台 + FR-012 质量评估",
+      "N-004": "FR-002 溯源展示",
+      "N-005": "FR-006 Web组件 + FR-007 API",
+      "N-006": "FR-003 转人工触发 + FR-010 敏感词",
+      "N-007": "FR-009 流式延迟",
+      "N-008": "FR-008 知识库管理",
+      "N-009": "FR-005 多租户隔离",
+      "N-010": "FR-011 工单导出"
+    },
+    "requirement_section_mapping": {
+      "FR-001": "四.4.2",
+      "FR-002": "四.4.1",
+      "FR-003": "四.4.1 + 六",
+      "FR-004": "四.4.1",
+      "FR-005": "四.4.1",
+      "FR-006": "四.4.1",
+      "FR-007": "四.4.1",
+      "FR-008": "四.4.1",
+      "FR-009": "四.4.1 + 七",
+      "FR-010": "四.4.1",
+      "FR-011": "四.4.1",
+      "FR-012": "四.4.1"
+    },
+    "orphan_requirements": [],
+    "untracked_needs": [],
+    "unlinked_sections": []
+  },
+  "ambiguity_report": [
+    {
+      "term": "\"快速\"",
+      "location": "三.3.2 — '快速获得准确答案'",
+      "count": 1,
+      "suggested_quantification": "已通过 FR-009 (P95 <3s) 量化，无需额外处理"
+    },
+    {
+      "term": "\"准确答案\"",
+      "location": "三.3.2",
+      "count": 1,
+      "suggested_quantification": "已通过 FR-001 验收标准 (≥95% 关联度) 部分量化，建议补充端到端回答准确率指标"
+    },
+    {
+      "term": "\"无缝转接\"",
+      "location": "三.3.2",
+      "count": 1,
+      "suggested_quantification": "已通过 FR-003 (携带 ≤300字摘要) 定义行为，可接受"
+    }
+  ],
+  "readiness": {
+    "can_proceed_to_signoff": true,
+    "blocking_issues_count": 0,
+    "recommended_actions_before_signoff": [
+      "ISSUE-001: 确认 PII 脱敏策略（合规前置）",
+      "ISSUE-002: 明确'回答-原文追溯关联度'的判定标准",
+      "ISSUE-003: 明确可用性指标的统计口径",
+      "ISSUE-004: 补充重试超时预算避免延迟超标",
+      "ISSUE-005: 补充用户验证计划（建议增加 M0 里程碑）"
+    ]
+  },
+  "notes": "PRD 整体质量良好。0 blocker 说明核心内容完整可交付。4 个 warning 集中在度量和定义精确性，不影响 V1 开发启动但需在评审会上一并确认。4 个 suggestion 可选择性采纳。追溯矩阵完整，12 条 FR 全部可追溯到 Phase 1 的 10 条 Need 和访谈原文。"
+}

@@ -1,0 +1,218 @@
+{
+  "phase": "discover",
+  "project_name": "AI智能客服Agent平台",
+  "project_slug": "ai-cs-agent",
+  "interviews": [
+    {
+      "round": 1,
+      "round_name": "Context Gathering",
+      "source": "产品经理（面试者自述需求）",
+      "questions_asked": [
+        "这个产品解决什么问题？目标用户是谁？",
+        "现在的客服方案有什么痛点？",
+        "成功的衡量标准是什么？",
+        "有什么技术或业务约束？"
+      ],
+      "key_excerpts": [
+        "中小企业使用传统客服系统成本高（人均培训+薪资 5k-8k/月），且高峰期人力不足",
+        "现有AI客服要么是关键词匹配（体验差），要么是大模型直接对话（不可控、幻觉风险）",
+        "目标：让 10 人以下的客服团队具备 50 人团队的处理能力",
+        "约束：需要支持私有知识库接入，不能使用公共模型训练数据",
+        "平台：先做 Web 管理端，业务侧提供 Web 聊天组件 + API"
+      ],
+      "extracted_needs": [
+        {
+          "id": "N-001",
+          "description": "支持导入私有知识库（PDF/网页/文本），Agent 基于知识库回答",
+          "confidence": 90,
+          "source_quote": "不能使用公共模型训练数据，要能接入企业自己的知识库",
+          "clarification_needed": false
+        },
+        {
+          "id": "N-002",
+          "description": "Agent 自动处理常见问题，复杂问题无缝转人工",
+          "confidence": 85,
+          "source_quote": "AI处理80%的常见问题，剩下20%复杂问题转人工",
+          "clarification_needed": false
+        },
+        {
+          "id": "N-003",
+          "description": "提供 Web 管理后台，支持知识库管理、对话监控、数据分析",
+          "confidence": 85,
+          "source_quote": "需要有管理后台，能看得到机器人处理了多少、人工处理了多少",
+          "clarification_needed": false
+        },
+        {
+          "id": "N-004",
+          "description": "Agent 回答需可溯源到知识库原文，降低幻觉风险",
+          "confidence": 80,
+          "source_quote": "大模型直接回答不可控，每条回答要能追溯到知识库里的原文",
+          "clarification_needed": true,
+          "clarification_detail": "溯源展示形式待确认：引用链接？原文高亮？置信度标签？"
+        },
+        {
+          "id": "N-005",
+          "description": "支持多渠道接入（Web组件、API、企业微信/飞书等）",
+          "confidence": 75,
+          "source_quote": "业务侧要能接入，Web端嵌个聊天组件，也要有API",
+          "clarification_needed": true,
+          "clarification_detail": "V1 确定支持哪几个渠道？Web组件+API是否足够？"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "round_name": "Deep Dive",
+      "source": "产品经理（面试者自述需求）",
+      "questions_asked": [
+        "'AI处理80%的问题' — 这个80%怎么衡量？",
+        "转人工的触发条件是什么？",
+        "谁负责维护知识库？更新频率怎样？",
+        "Agent 的回答延迟要求是多少？"
+      ],
+      "key_excerpts": [
+        "衡量方式：不需要人工介入的会话数 / 总会话数。目标 V1 达到 60%，V2 达到 80%",
+        "转人工触发：①用户明确要求转人工 ②Agent 连续两次回答置信度<70% ③敏感词检测（投诉/法律威胁）",
+        "知识库由客户的运营/客服主管维护，预计每周更新 2-3 次",
+        "用户发消息后 3 秒内开始回复（流式输出），感知延迟 <1 秒"
+      ],
+      "extracted_needs": [
+        {
+          "id": "N-006",
+          "description": "转人工触发规则：用户要求/连续低置信度/敏感词检测，三类场景",
+          "confidence": 90,
+          "source_quote": "转人工触发：①用户明确要求 ②连续两次回答置信度<70% ③敏感词",
+          "clarification_needed": false
+        },
+        {
+          "id": "N-007",
+          "description": "回复延迟要求：首 token <3s，流式输出，用户感知延迟 <1s",
+          "confidence": 90,
+          "source_quote": "用户发消息后3秒内开始回复，流式输出，感知延迟不超过1秒",
+          "clarification_needed": false
+        },
+        {
+          "id": "N-008",
+          "description": "知识库管理后台：支持增删改查、批量导入、更新审核流程",
+          "confidence": 80,
+          "source_quote": "运营/客服主管维护，每周更新2-3次",
+          "clarification_needed": true,
+          "clarification_detail": "更新是否需要审核流程？批量导入支持哪些格式？"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "round_name": "Gap Detection",
+      "source": "分析推断",
+      "questions_asked": [
+        "是否需要支持多语言？",
+        "是否有多租户隔离需求？",
+        "Agent 是否需要主动发起对话（如主动营销）？",
+        "是否需要与客户的CRM/工单系统打通？"
+      ],
+      "key_excerpts": [
+        "V1 仅中文，V2 考虑英文",
+        "多租户必须隔离，每个企业的知识库、对话记录、配置完全独立",
+        "V1 仅被动应答，不做主动营销",
+        "V1 不做CRM集成，但预留工单导出接口"
+      ],
+      "extracted_needs": [
+        {
+          "id": "N-009",
+          "description": "多租户数据隔离：知识库、对话记录、Agent 配置完全隔离",
+          "confidence": 90,
+          "source_quote": "多租户必须隔离，每个企业的知识库、对话记录、配置完全独立",
+          "clarification_needed": false
+        },
+        {
+          "id": "N-010",
+          "description": "V1 仅中文、仅被动应答、不集成CRM，预留工单导出接口",
+          "confidence": 85,
+          "source_quote": "V1 仅中文，被动应答，不做CRM集成，预留工单导出接口",
+          "clarification_needed": false
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "round_name": "Ambiguity Resolution",
+      "source": "产品经理（面试者自述需求）",
+      "ambiguities_resolved": [
+        {
+          "id": "AMB-001",
+          "term": "Agent 回答可溯源",
+          "interpretations_presented": [
+            "A) 每条回答底部展示引用知识库文档标题+段落链接",
+            "B) 回答中关键事实以脚注形式标注来源",
+            "C) 用户可点击「查看来源」展开原文高亮片段"
+          ],
+          "resolution": "A + C 组合：回答底部默认显示引用文档标题，用户可点击展开原文高亮"
+        },
+        {
+          "id": "AMB-002",
+          "term": "多渠道接入",
+          "interpretations_presented": [
+            "A) V1 只做 Web 聊天组件 + REST API",
+            "B) V1 同时支持 Web + 企微 + 飞书",
+            "C) V1 只做 API，渠道由客户自行对接"
+          ],
+          "resolution": "A) V1 只做 Web 聊天组件 + REST API；企微/飞书等渠道 V2 再做"
+        }
+      ]
+    }
+  ],
+  "personas_detected": [
+    {
+      "name": "客服主管",
+      "role": "管理客服团队，维护知识库，监控服务质量",
+      "core_need": "降低人工成本，保证回答质量，了解Agent处理情况",
+      "source_quote": "运营/客服主管维护知识库，每周更新2-3次"
+    },
+    {
+      "name": "终端用户",
+      "role": "企业的客户，通过聊天组件咨询问题",
+      "core_need": "快速获得准确答案，遇到复杂问题能转人工",
+      "source_quote": "用户发消息后3秒内开始回复"
+    },
+    {
+      "name": "企业管理员",
+      "role": "负责系统配置、渠道接入、权限管理",
+      "core_need": "快速接入Agent，管理租户配置，查看使用数据",
+      "source_quote": "需要有管理后台，能看得到数据"
+    }
+  ],
+  "ambiguities_for_review": [
+    {
+      "id": "AMB-003",
+      "term": "知识库更新审核流程",
+      "status": "pending",
+      "detail": "客服主管更新知识库后是否需要审批？谁审批？"
+    },
+    {
+      "id": "AMB-004",
+      "term": "Agent 人格/语气定制",
+      "status": "pending",
+      "detail": "企业是否可以自定义Agent的语气风格（正式/亲切/专业）？"
+    }
+  ],
+  "gaps_identified": [
+    {
+      "area": "定价模式",
+      "description": "未讨论收费模式（按会话数/按Token/按坐席/订阅制）",
+      "suggested_question": "面向中小企业的定价模型是什么？"
+    },
+    {
+      "area": "数据统计需求",
+      "description": "管理后台需要哪些具体的统计指标",
+      "suggested_question": "客服主管最关心的数据指标有哪些？"
+    },
+    {
+      "area": "Agent 评估体系",
+      "description": "如何评估 Agent 回答质量？谁来做标注？",
+      "suggested_question": "回答质量的评估标准和流程是什么？"
+    }
+  ],
+  "ready_for_analysis": true,
+  "notes": "项目核心是知识库+RAG的Agent，非通用对话机器人。关键差异化在可溯源性。多租户隔离是架构关键约束。V1 范围基本清晰，定价和评估体系待后续确认。"
+}

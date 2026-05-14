@@ -1,0 +1,288 @@
+{
+  "phase": "analyze",
+  "project_name": "AI智能客服Agent平台",
+  "project_slug": "ai-cs-agent",
+  "requirements": [
+    {
+      "id": "FR-001",
+      "description": "企业可导入私有知识库（PDF/网页/文本），Agent 基于知识库内容回答用户问题",
+      "priority": "Must",
+      "priority_justification": "产品核心价值主张，无此功能产品不成立",
+      "acceptance_criteria": [
+        "支持上传 PDF（≤20MB）、网页 URL、纯文本三种格式",
+        "上传后 5 分钟内完成解析和向量化，管理后台显示处理状态",
+        "Agent 回答内容与知识库原文的可追溯关联度 ≥ 95%（人工抽检 100 条中 ≥ 95 条可找到对应原文）"
+      ],
+      "source_need_ids": ["N-001", "N-004"],
+      "source_quote": "不能使用公共模型训练数据，要能接入企业自己的知识库；每条回答要能追溯到知识库里的原文"
+    },
+    {
+      "id": "FR-002",
+      "description": "Agent 展示回答来源：底部显示引用文档标题，用户点击可展开原文高亮片段",
+      "priority": "Must",
+      "priority_justification": "差异化竞争力；访谈中用户在两轮都强调了可溯源的重要性",
+      "acceptance_criteria": [
+        "每条 Agent 回答底部展示 ≥1 条引用文档标题",
+        "点击引用后展开对应段落（≤200字），原文中相关句高亮",
+        "若知识库中无相关内容，Agent 回复 '抱歉，我目前的知识库中没有相关信息' 而非编造"
+      ],
+      "source_need_ids": ["N-004"],
+      "source_quote": "A+C组合：回答底部默认显示引用文档标题，用户可点击展开原文高亮"
+    },
+    {
+      "id": "FR-003",
+      "description": "智能转人工：满足三类条件之一时自动转接人工坐席",
+      "priority": "Must",
+      "priority_justification": "Agent 不可控场景的兜底机制，直接影响客户体验和风险控制",
+      "acceptance_criteria": [
+        "用户消息包含'转人工/人工客服/投诉'等关键词时，立即转人工",
+        "Agent 连续两次回答置信度 <70% 时，自动触发转人工",
+        "消息中包含预配置的敏感词（如'律师函/起诉/消协'）时，立即转人工并告警",
+        "转人工时携带当前会话摘要（≤300字），人工坐席无需重复询问"
+      ],
+      "source_need_ids": ["N-002", "N-006"],
+      "source_quote": "三类触发：用户要求/连续低置信度/敏感词检测"
+    },
+    {
+      "id": "FR-004",
+      "description": "Web 管理后台：支持知识库管理、对话记录查看、数据分析仪表盘",
+      "priority": "Must",
+      "priority_justification": "企业客户的运营入口，无管理后台产品无法商用",
+      "acceptance_criteria": [
+        "知识库管理：增删改查条目、批量导入、按分类筛选、查看处理状态",
+        "对话记录：按时间/用户/状态（AI处理/已转人工）筛选、查看完整对话",
+        "数据仪表盘：展示总会话数、AI处理率、转人工率、高频问题 TOP10"
+      ],
+      "source_need_ids": ["N-003", "N-008"],
+      "source_quote": "需要有管理后台，能看得到机器人处理了多少、人工处理了多少"
+    },
+    {
+      "id": "FR-005",
+      "description": "多租户数据隔离：知识库、对话记录、Agent 配置完全按租户隔离",
+      "priority": "Must",
+      "priority_justification": "架构基础约束，涉及数据安全和合规，V1不实现则无法商用",
+      "acceptance_criteria": [
+        "租户 A 的知识库/对话/配置无法被租户 B 通过 API 或界面访问",
+        "租户数据存储在独立命名空间下",
+        "新增租户无需修改代码，通过管理后台完成"
+      ],
+      "source_need_ids": ["N-009"],
+      "source_quote": "多租户必须隔离，每个企业的知识库、对话记录、配置完全独立"
+    },
+    {
+      "id": "FR-006",
+      "description": "Web 聊天组件：企业可嵌入其网站/产品的对话窗口",
+      "priority": "Must",
+      "priority_justification": "V1 确定的两个对外渠道之一",
+      "acceptance_criteria": [
+        "提供 ≤50KB 的 JS SDK，一行代码嵌入网页",
+        "支持自定义颜色/Logo/欢迎语",
+        "移动端和桌面端自适应"
+      ],
+      "source_need_ids": ["N-005"],
+      "source_quote": "Web端嵌个聊天组件"
+    },
+    {
+      "id": "FR-007",
+      "description": "REST API：提供对话接口供企业自有系统集成",
+      "priority": "Must",
+      "priority_justification": "V1 确定的两个对外渠道之一",
+      "acceptance_criteria": [
+        "提供 /conversations 创建/查询接口",
+        "支持 API Key 认证",
+        "文档含请求/响应示例，响应时间 P99 <5s"
+      ],
+      "source_need_ids": ["N-005"],
+      "source_quote": "也要有API"
+    },
+    {
+      "id": "FR-008",
+      "description": "客服主管可在管理后台创建/编辑知识库条目，支持批量导入和审核流程",
+      "priority": "Should",
+      "priority_justification": "知识库管理是持续运营的核心，但 V1 审核流程可简化为编辑者自审",
+      "acceptance_criteria": [
+        "单条创建：标题+内容+分类+标签",
+        "批量导入：支持 CSV/Excel，一次 ≤5000 条",
+        "更新后 5 分钟内生效于 Agent 回答"
+      ],
+      "source_need_ids": ["N-008"],
+      "source_quote": "运营/客服主管维护知识库，每周更新2-3次"
+    },
+    {
+      "id": "FR-009",
+      "description": "Agent 回答延迟：首 token <3s，流式输出，首字感知延迟 <1s",
+      "priority": "Must",
+      "priority_justification": "直接影响终端用户体验，客服场景对延迟敏感",
+      "acceptance_criteria": [
+        "P95 首 token 延迟 <3s",
+        "P99 首 token 延迟 <5s",
+        "流式输出 token 速率 ≥30 tokens/s"
+      ],
+      "source_need_ids": ["N-007"],
+      "source_quote": "用户发消息后3秒内开始回复"
+    },
+    {
+      "id": "FR-010",
+      "description": "敏感词检测：企业可配置自定义敏感词库，命中后自动转人工并告警",
+      "priority": "Should",
+      "priority_justification": "非所有客户都需要，但金融/医疗等行业是刚需",
+      "acceptance_criteria": [
+        "管理后台支持配置敏感词列表",
+        "命中后实时告警（管理后台弹窗 + 可选邮件通知）",
+        "敏感词检测延迟 <200ms，不影响对话响应"
+      ],
+      "source_need_ids": ["N-006"],
+      "source_quote": "敏感词检测（投诉/法律威胁）"
+    },
+    {
+      "id": "FR-011",
+      "description": "工单导出：支持将转人工的会话导出为标准格式",
+      "priority": "Could",
+      "priority_justification": "为后续CRM集成预留，V1可做简单导出",
+      "acceptance_criteria": [
+        "支持导出为 CSV/JSON 格式",
+        "导出内容包含：会话ID、时间、用户消息、Agent回答、转人工原因"
+      ],
+      "source_need_ids": ["N-010"],
+      "source_quote": "V1不做CRM集成，但预留工单导出接口"
+    },
+    {
+      "id": "FR-012",
+      "description": "Agent 回答质量评估：客服主管可对回答进行满意度标注",
+      "priority": "Could",
+      "priority_justification": "评估体系对持续优化重要，但V1可先依赖转人工率和用户反馈",
+      "acceptance_criteria": [
+        "对话详情页支持标注：满意/不满意/需改进",
+        "标注数据可在仪表盘中按时间汇总"
+      ],
+      "source_need_ids": ["N-003"],
+      "source_quote": "从 gaps_identified 中推断：如何评估 Agent 回答质量"
+    }
+  ],
+  "personas": {
+    "primary": {
+      "name": "客服主管",
+      "description": "管理 3-10 人客服团队的中小企业主管，负责维护知识库、监控服务质量、控制成本。非技术背景，需要直观的管理界面。"
+    },
+    "secondary": [
+      {
+        "name": "终端用户",
+        "description": "企业的客户，通过 Web 聊天组件咨询产品/服务问题。期望快速准确回复，对机器人有基本接受度，但复杂问题要求人工介入。"
+      },
+      {
+        "name": "企业管理员",
+        "description": "负责系统初始配置（知识库导入、渠道接入、租户设置）的技术或半技术人员。一次性配置为主，日常使用频率低。"
+      }
+    ],
+    "anti_personas": [
+      {
+        "name": "大型呼叫中心管理者",
+        "description": "管理 100+ 坐席的大型客服中心，需求复杂度远超 V1 范围（排班、质检、CRM深度集成等）"
+      }
+    ]
+  },
+  "edge_cases": [
+    {
+      "id": "EC-001",
+      "category": "boundary",
+      "scenario": "企业上传 0 字节的 PDF 或空文本作为知识库条目",
+      "expected_behavior": "后端校验拒绝，提示'文件内容为空，请检查后重新上传'",
+      "priority": "P2",
+      "source": "分析推断—输入校验基础场景"
+    },
+    {
+      "id": "EC-002",
+      "category": "boundary",
+      "scenario": "单租户知识库条目数达到 50000 条上限",
+      "expected_behavior": "上传时提示已达上限，建议清理或联系升级方案",
+      "priority": "P1",
+      "source": "分析推断—大规模知识库的检索性能边界"
+    },
+    {
+      "id": "EC-003",
+      "category": "concurrency",
+      "scenario": "客服主管正在编辑知识库条目时，该条目被另一个管理员同时删除或修改",
+      "expected_behavior": "采用乐观锁：后保存者收到冲突提示，展示两版本差异，选择覆盖或合并。待确认-需技术评估实现成本",
+      "priority": "P1",
+      "source": "分析推断—多管理员协作场景"
+    },
+    {
+      "id": "EC-004",
+      "category": "concurrency",
+      "scenario": "同一终端用户短时间内连续发送 10 条消息（网络恢复后积压消息批量到达）",
+      "expected_behavior": "按到达顺序处理，不丢失不重复。若队列深度 >5，后续消息提示'您输入较快，请稍候'",
+      "priority": "P1",
+      "source": "分析推断—移动端弱网常见场景"
+    },
+    {
+      "id": "EC-005",
+      "category": "state",
+      "scenario": "会话已转人工后，用户在等待人工时继续向 Agent 发消息",
+      "expected_behavior": "消息同时推送给等待中的人工坐席；若坐席已接入，Agent 进入静默模式不抢答",
+      "priority": "P1",
+      "source": "分析推断—转人工状态下的混合交互"
+    },
+    {
+      "id": "EC-006",
+      "category": "state",
+      "scenario": "Agent 触发转人工但当前无在线坐席",
+      "expected_behavior": "提示'当前人工坐席繁忙，预计等待 X 分钟，您也可以先留言'。留言自动创建待处理工单。",
+      "priority": "P0",
+      "source": "分析推断—非工作时间或高峰期"
+    },
+    {
+      "id": "EC-007",
+      "category": "validation",
+      "scenario": "用户通过聊天输入框发送 SQL 注入字符串 / XSS 脚本",
+      "expected_behavior": "输入经过清洗后安全存储和展示。Agent 将其视为普通文本，回复'抱歉，我没有理解您的问题'而不执行任何代码",
+      "priority": "P0",
+      "source": "分析推断—Web 输入基本安全要求"
+    },
+    {
+      "id": "EC-008",
+      "category": "validation",
+      "scenario": "知识库中包含相互矛盾的信息（如两篇文档对退款政策的描述不一致）",
+      "expected_behavior": "Agent 回复时优先使用最近更新的条目，并在引用中标注'信息可能存在更新'。管理后台检测到矛盾条目时发出提示。待确认-矛盾检测的自动化程度",
+      "priority": "P1",
+      "source": "分析推断—大型知识库维护中的常见问题"
+    },
+    {
+      "id": "EC-009",
+      "category": "recovery",
+      "scenario": "Agent 生成回答过程中 LLM 服务超时或返回错误",
+      "expected_behavior": "自动重试 1 次；若仍失败，提示'抱歉，我暂时无法处理您的问题，请稍后再试或转人工'。错误详情记录到后台日志。",
+      "priority": "P0",
+      "source": "分析推断—LLM 服务不稳定性"
+    },
+    {
+      "id": "EC-010",
+      "category": "recovery",
+      "scenario": "知识库重新导入后，正在进行的会话中的 Agent 行为",
+      "expected_behavior": "新会话立即使用更新后的知识库；已有会话在下一轮对话中使用新知识库。不中断已有会话。",
+      "priority": "P2",
+      "source": "分析推断—知识库热更新场景"
+    }
+  ],
+  "consistency_issues": [
+    {
+      "requirement_ids": ["FR-009", "FR-003"],
+      "contradiction": "FR-009 要求首 token <3s，但 FR-003 中敏感词检测需额外耗时。如果敏感词检测在 LLM 调用前进行（200ms），不构成矛盾；如果敏感词检测需要实时扫描 LLM 输出，可能增加延迟。",
+      "suggested_resolution": "敏感词检测分两阶段：①输入侧预检测（<200ms）拦截用户消息中的敏感词 ②输出侧异步检测不影响首token延迟。标记为 warning 级别",
+      "severity": "warning"
+    }
+  ],
+  "out_of_scope_suggestions": [
+    {
+      "requirement_id": "FR-012",
+      "reason": "评估体系依赖持续运营数据，V1先用转人工率+用户满意度（👍👎）替代",
+      "stakeholder_alignment": "待确认"
+    },
+    {
+      "requirement_id": "FR-011",
+      "reason": "工单导出V1可做CSV导出，完整CRM集成排到V2",
+      "stakeholder_alignment": "已确认（Phase 1 明确V1不做CRM集成）"
+    }
+  ],
+  "ready_for_generation": true,
+  "notes": "共生成 12 条功能需求，Must 7 / Should 3 / Could 2。边界用例 10 条覆盖全部 5 类。发现 1 个 warning 级一致性风险（敏感词检测 vs 延迟）。项目架构核心约束：多租户隔离 + RAG 可溯源 + 流式低延迟。"
+}
