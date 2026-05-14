@@ -63,11 +63,14 @@ async function* streamSSE(url, body) {
 async function startProject(project) {
   state.isStreaming = true;
   disableInput(true);
-
   addMessage('agent', '');
 
-  for await (const evt of streamSSE('/api/start', { project })) {
-    handleEvent(evt, project);
+  try {
+    for await (const evt of streamSSE('/api/start', { project })) {
+      handleEvent(evt, project);
+    }
+  } catch (e) {
+    addMessage('system', '连接失败: ' + e.message + '。请刷新页面重试。');
   }
 
   state.isStreaming = false;
@@ -92,17 +95,21 @@ async function sendMessage() {
     return;
   }
 
-  if (state.readyForConfirm && ['确认', 'confirm', 'ok', '继续'].includes(msg.toLowerCase())) {
-    state.readyForConfirm = false;
-    showConfirmButton(false);
-    inputEl.placeholder = 'Agent 正在处理，请稍候...';
-    await advanceAndStream();
-    inputEl.placeholder = '输入你的回答...';
-  } else {
-    addMessage('agent', '');
-    for await (const evt of streamSSE(`/api/chat/${state.sessionId}`, { message: msg })) {
-      handleEvent(evt);
+  try {
+    if (state.readyForConfirm && ['确认', 'confirm', 'ok', '继续'].includes(msg.toLowerCase())) {
+      state.readyForConfirm = false;
+      showConfirmButton(false);
+      inputEl.placeholder = 'Agent 正在处理，请稍候...';
+      await advanceAndStream();
+      inputEl.placeholder = '输入你的回答...';
+    } else {
+      addMessage('agent', '');
+      for await (const evt of streamSSE(`/api/chat/${state.sessionId}`, { message: msg })) {
+        handleEvent(evt);
+      }
     }
+  } catch (e) {
+    addMessage('system', '请求失败: ' + e.message + '。请重试。');
   }
 
   state.isStreaming = false;
@@ -125,8 +132,15 @@ async function confirmPhase() {
 
 async function advanceAndStream() {
   addMessage('system', 'Phase ' + state.currentPhase + ' 已确认，进入下一阶段...');
-  for await (const evt of streamSSE(`/api/chat/${state.sessionId}`, { message: '确认' })) {
-    handleEvent(evt);
+  try {
+    for await (const evt of streamSSE(`/api/chat/${state.sessionId}`, { message: '确认' })) {
+      handleEvent(evt);
+    }
+  } catch (e) {
+    addMessage('system', '阶段推进失败: ' + e.message + '。请重试确认。');
+    state.readyForConfirm = true;
+    showConfirmButton(true);
+    throw e;
   }
 }
 
