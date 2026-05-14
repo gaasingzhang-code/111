@@ -78,6 +78,7 @@ async function startProject(project) {
       updatePhaseUI(evt.phase);
       chatHeaderTitle.textContent = project;
       phaseBadge.textContent = evt.name;
+      renderPhaseGuide(evt.phase);
     } else if (evt.type === 'token') {
       appendToLastMessage(evt.text);
     } else if (evt.type === 'token_done') {
@@ -153,6 +154,7 @@ function handleStreamEvent(evt) {
     phaseBadge.textContent = evt.name;
     addMessage('system', 'Phase ' + evt.phase + ': ' + evt.name);
     addMessage('agent', '');
+    renderPhaseGuide(evt.phase);
   } else if (evt.type === 'token') {
     appendToLastMessage(evt.text);
   } else if (evt.type === 'token_done') {
@@ -258,6 +260,11 @@ function scrollToBottom() {
 async function updateArtifacts() {
   if (!state.sessionId) return;
 
+  // Show loading indicator
+  if (!state.artifacts.prd && !state.artifacts.review) {
+    artifactContent.innerHTML = '<div class="empty-state">正在加载阶段产物...</div>';
+  }
+
   try {
     const resp = await fetch(`/api/session/${state.sessionId}`);
     const data = await resp.json();
@@ -273,16 +280,70 @@ async function updateArtifacts() {
         state.artifacts.review = await reviewResp.text();
       }
     }
-    renderArtifactTab('prd');
+    // Auto-select the best tab to show
+    if (state.artifacts.review) {
+      renderArtifactTab('trace');
+      $$('.artifact-tab').forEach(t => t.classList.remove('active'));
+      $('.artifact-tab[data-tab="trace"]')?.classList.add('active');
+    } else if (state.artifacts.prd) {
+      renderArtifactTab('prd');
+      $$('.artifact-tab').forEach(t => t.classList.remove('active'));
+      $('.artifact-tab[data-tab="prd"]')?.classList.add('active');
+    }
     downloadLinks.innerHTML = '';
     if (state.artifacts.prd) {
-      downloadLinks.innerHTML += `<a class="download-btn" href="/api/export/${state.sessionId}/prd" download>Download PRD</a>`;
+      downloadLinks.innerHTML += `<a class="download-btn" href="/api/export/${state.sessionId}/prd" download>下载 PRD</a>`;
     }
     if (state.artifacts.review) {
-      downloadLinks.innerHTML += `<a class="download-btn" href="/api/export/${state.sessionId}/trace" download>Download Traceability</a>`;
+      downloadLinks.innerHTML += `<a class="download-btn" href="/api/export/${state.sessionId}/trace" download>下载 追溯矩阵</a>`;
     }
   } catch (e) {
-    // ignore
+    // ignore fetch errors
+  }
+}
+
+function renderPhaseGuide(phase) {
+  const guides = {
+    1: `<div class="phase-guide">
+      <h4>📋 Phase 1 — 结构化访谈</h4>
+      <p>正在进行 4 轮访谈：</p>
+      <ol>
+        <li><strong>背景收集</strong>：问题、用户、目标、约束</li>
+        <li><strong>深入追问</strong>：量化模糊表述</li>
+        <li><strong>缺口检测</strong>：发现遗漏信息</li>
+        <li><strong>模糊澄清</strong>：列举解读让用户选择</li>
+      </ol>
+      <p style="margin-top:8px;color:var(--text-secondary);font-size:12px;">左侧面板圆点显示当前进度</p>
+    </div>`,
+    2: `<div class="phase-guide">
+      <h4>🔍 Phase 2 — 需求分析</h4>
+      <p>Agent 正在执行：</p>
+      <ul>
+        <li>MoSCoW 优先级分类</li>
+        <li>5 类边界用例枚举</li>
+        <li>跨需求一致性检查</li>
+      </ul>
+      <p style="margin-top:8px;color:var(--text-secondary);font-size:12px;">完成后右侧将展示分析结果</p>
+    </div>`,
+    3: `<div class="phase-guide">
+      <h4>📝 Phase 3 — PRD 生成</h4>
+      <p>正在按 12 章节模板生成完整 PRD...</p>
+      <p style="margin-top:8px;color:var(--text-secondary);font-size:12px;">生成完毕后点击「PRD」标签查看</p>
+    </div>`,
+    4: `<div class="phase-guide">
+      <h4>✅ Phase 4 — 质量审查</h4>
+      <p>正在审计 PRD：完整度、模糊表述、可度量性、追溯性</p>
+      <p style="margin-top:8px;color:var(--text-secondary);font-size:12px;">完成后点击「Traceability」标签查看审计报告</p>
+    </div>`,
+    5: `<div class="phase-guide">
+      <h4>🎉 Phase 5 — 最终交付</h4>
+      <p>正在精炼最终 PRD 并生成追溯矩阵...</p>
+    </div>`,
+  };
+
+  const content = guides[phase] || '';
+  if (content && !state.artifacts.prd && !state.artifacts.review) {
+    artifactContent.innerHTML = content;
   }
 }
 
