@@ -69,7 +69,7 @@ Project: {session.get('project_name', '待定义')}
 You are in **Round {round_num}/4: {round_name}**.
 {guidance}
 
-Ask one question at a time.
+Ask one question at a time. Keep each response concise (under 400 characters).
 When you have sufficient information across all 4 rounds (confidence >= 80 on key needs), present a structured summary of extracted needs, personas, and ambiguities.
 End your summary with the exact marker: [READY_FOR_CONFIRM]
 """
@@ -86,8 +86,7 @@ End your summary with the exact marker: [READY_FOR_CONFIRM]
 {discover_data}
 
 Analyze the above needs. Output MoSCoW classification, edge cases, and consistency checks.
-Produce structured output per your defined JSON schema.
-End your output with the exact marker: [READY_FOR_CONFIRM]
+Keep output concise and structured. End with: [READY_FOR_CONFIRM]
 """
     elif phase == 3:
         agent_prompt = load_agent("prd-writer")
@@ -102,8 +101,7 @@ End your output with the exact marker: [READY_FOR_CONFIRM]
 {analyze_data}
 
 Generate a complete PRD following the template. Fill all 12 sections.
-Mark missing information with 「待确认」.
-End your output with the exact marker: [READY_FOR_CONFIRM]
+Mark missing information with 「待确认」. End with: [READY_FOR_CONFIRM]
 """
     elif phase == 4:
         agent_prompt = load_agent("reviewer")
@@ -122,7 +120,7 @@ End your output with the exact marker: [READY_FOR_CONFIRM]
 {prd}
 
 Audit this PRD. Output a structured review report with issues by severity (blocker/warning/suggestion).
-End your output with the exact marker: [READY_FOR_CONFIRM]
+Keep output concise. End with: [READY_FOR_CONFIRM]
 """
     return ""
 
@@ -277,6 +275,9 @@ async def chat(session_id: str, request: Request):
             if session.get("round", 1) < 4:
                 session["round"] = session.get("round", 1) + 1
                 yield f"data: {json.dumps({'type': 'round', 'round': session['round'], 'total': 4})}\n\n"
+            # Fallback: force confirm-ready after round 4 even if marker missing
+            if session.get("round", 1) >= 4 and not parse_confirm(full_response):
+                full_response += "\n\n[READY_FOR_CONFIRM]"
 
         if parse_confirm(full_response):
             session["ready_for_confirm"] = True

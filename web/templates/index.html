@@ -42,11 +42,14 @@
   <!-- Chat Area (Center) -->
   <main class="chat-area">
     <div class="chat-header">
-      <h2>
-        ReqBot
-        <span id="phase-badge" class="phase-badge">启动中...</span>
-      </h2>
-      <span id="chat-header-title" style="font-size:13px;color:var(--text-secondary)"></span>
+      <div>
+        <h2>
+          ReqBot
+          <span id="phase-badge" class="phase-badge">就绪</span>
+        </h2>
+        <span id="chat-header-title" style="font-size:13px;color:var(--text-secondary)"></span>
+      </div>
+      <a id="export-btn" class="export-btn" style="display:none" href="#" download>导出 PRD .md</a>
     </div>
 
     <div id="messages" class="messages"></div>
